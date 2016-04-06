@@ -1,35 +1,181 @@
 from sys import exit, argv
 from collections import deque
 from os.path import exists
+import random
 
 script, x, y, z = args
- 
+
 def dreadnought2():
 	
 	global squad
 	
 	print "You enter the bridge. You hear a whirl of hydraulics and scatter."
+	
+	print "You roll 2D6 to see if anyone is engulfed in the hail of cannon fire."
+	print "7+ means squad gets safely to cover."
+	print "6 or less means 1 fatality.\n"
+		
+	d1 = random.randint(1, 6)
+	d2 = random.randint(1, 6)
+	print d1, d2
+	result = d1 + d2
+	print "You roll a %d\n" % result
+		
+	if result > 6:
+		print "All squad members make it to cover safely.\n"
+	elif result <= 6:	
+		x = len(squad) - 1
+		fatal = squad[random.randint(0, x)]
+		if fatal == "Commander":
+			dead("You die in glorious conflict!")
+		else:
+			print "You make it to cover. You squad checks in. The %s is dead.\n" % fatal
+			squad.remove(fatal)
+			print squad
+	else:
+		dead("Death has caught up with you Commander!")
+	
 	print "A hail of cannon rains down on your position of cover."
 	print "A dreadnought stands on the centre of the bridge.\n"
+	print "What is the next move Commander?\n"
 	print "1. Organise an assault?"
 	print "2. Distract and setup cannon?"
-	print "3. Head back to the corridor and regroup?"
+	print "3. Head back to the corridor and regroup?\n"
+	
+	print "Roll 9 or higher to register damage on a Dreadnought......\n"
 	
 	choice = raw_input("> ")
 	
 	if choice == "1":
+		dread = 5
+		
+		while dread and squad > 0:
+			d1 = random.randint(1, 6)
+			d2 = random.randint(1, 6)
+			print d1, d2
+			result = d1 + d2
+			print "You roll a %d\n" % result
+				
+			if result > 8:
+				print "You have damaged the Dreadnought!\n"
+				dread -= 1
+			elif result <= 8:
+				print "One of your squad was hit!"
+				x = len(squad)-1
+				fatal = squad[random.randint(0, x)]
+					
+				if fatal == "Commander":
+					dead("You die in glorious conflict!")
+				elif squad > 0:
+					print "The %s is dead.\n" % fatal
+					squad.remove(fatal)
+					print squad
+				else:
+					dead("You have been annihilated!")
+			else:
+				dead("You have been annihilated")
+		print "You setup the cannon and it destroys the Dreadnought! VICTORY!!"
+		print squad
+		exit(0)
+				
+	elif choice == "2":
 		if len(squad) > 1:
 			y = squad[0]
-			print "\nThe %s is obliterated!" % y
+			print "\nThe %s is obliterated in setting a diversion." % y
+			print "She died a glorious death!\n"
 			squad.remove(y)
 			print squad
-			print "Make another call Commander!\n"
-			dreadnought2()
+			print "The Cannon is in place...You fire it up!"
+			print "The Cannon is powerful so only needs a roll of 7+ to hit.\n"
+
+			dread = 5
+			cannon = 3
+		
+			while dread and cannon > 0:
+				d1 = random.randint(1, 6)
+				d2 = random.randint(1, 6)
+				print d1, d2
+				result = d1 + d2
+				print "Cannon rolls a %d" % result
+				
+				if result > 6:
+					print "You have damaged the Dreadnought!\n"
+					dread -= 1
+				elif result <= 6:
+					print "The cannon was hit!\n"
+					cannon -= 1
+				else:
+					dead("The cannon blows you up!")
+				
+			if dread == 0:
+				print "The cannon destroys the Dreadnought! VICTORY!!"
+				print "The following will become immortal Commander!"
+				print squad
+				exit(0)
+			elif cannon == 0:
+				print "You must face the Dreadnought...\n"
+				
+				while dread and squad > 0:
+					d1 = random.randint(1, 6)
+					d2 = random.randint(1, 6)
+					print d1, d2
+					result = d1 + d2
+					print "You roll a %d\n" % result
+				
+					if result > 8:
+						print "A Mech has been slain!\n"
+						dread -= 1
+					elif result <= 8:
+						print "One of your squad was hit!"
+						x = len(squad) - 1
+						fatal = squad[random.randint(0, x)]
+					
+						if fatal == "Commander":
+							dead("You die in glorious conflict!")
+						elif squad > 1:
+							print "The %s is dead.\n" % fatal
+							squad.remove(fatal)
+							print squad
+						else:
+							dead("You have been annihilated!")
+					else:
+						dead("You have been annihilated")
+						
+				print "The cannon destroys the Dreadnought! VICTORY!!"
+				print "The following will become immortal Commander!"
+				print squad
+				exit(0)
 		else:	
 			dead("You die a glorious death!!")
-	elif choice == "2":
-		print "You setup the cannon and it destroys the Dreadnought! VICTORY!!"
-		exit(0)
+	
+	
+	elif choice == "3":
+		print "The Dreadnought has the advantage and you are supressed with laser fire."
+		print "You resolve to retreat..."
+		print "You roll 2D6."
+		print "7+ means squad gets safely to cover."
+		print "6 or less means 1 fatality.\n"
+		d1 = random.randint(1, 6)
+		d2 = random.randint(1, 6)
+		print d1, d2
+		result = d1 + d2
+		print "You roll a %d\n" % result
+		
+		if result > 6:
+			print "All squad members make it to cover safely."
+			dreadnought2()
+		elif result <= 6:
+			x = len(squad) - 1
+			fatal = squad[random.randint(0, x)]
+			if fatal == "Commander":
+				dead("You die in glorious conflict!")
+			else:
+				print "You make it to cover. You squad checks in. The %s is dead.\n" % fatal
+				squad.remove(fatal)
+				print squad
+				dreadnought2()
+		else:
+			dead("You are hacked down in gunfire!")
 	else:
 		dead("You are hunted down and killed like dogs!")
 
@@ -46,17 +192,43 @@ def laser_cannon():
 	print "2. Create a diversion and disable the cannon?"
 	print "3. Charge the cannon and take it out the old fashioned way?"
 	
-	choice = raw_input()
-	# Need the cannon to destroy boss. Need cannon variable.....???
-	# Or do it with an alternative function!!! :) Maybe...??
+	choice = raw_input("> ")
+	
 	if choice == "1":
-		print "Your team blows the cannon up!\n"
-		#The explosion alerts the dreadnought to your presence == DEATH!!!!
+		print "You blow the cannon up!\n"
 		dreadnought1()
 	elif choice == "2":
-		print "Your team disables the cannon."
-		print "You take the cannon with you.\n"
-		dreadnought2()
+		print "You resolve to divert and conquer the cannon."
+		print "You roll 2D6."
+		print "7+ means squad achieves objective unscathed."
+		print "6 or less means 1 fatality.\n"
+		
+		d1 = random.randint(1, 6)
+		d2 = random.randint(1, 6)
+		print d1, d2
+		result = d1 + d2
+		print "You roll a %d\n" % result
+		
+		if result > 6:
+			print "All squad members are safe and accounted for."
+			print "You disable the cannon."
+			print "You take the cannon with you.\n"
+			dreadnought2()
+	
+		elif result <= 6:	
+			x = len(squad) - 1
+			fatal = squad[random.randint(0, x)]
+			if fatal == "Commander":
+				dead("You die in glorious conflict!")
+			else:
+				print "You recover the cannon. You squad checks in. The %s is dead.\n" % fatal
+				squad.remove(fatal)
+				print squad
+				print "You disable the cannon and take it with you.\n"
+				dreadnought2()
+		else:
+			dead("You die via some unknown and unspeakable means.")
+		
 	elif choice == "3":
 		if len(squad) == 1:
 			dead("Suicide!")
@@ -78,29 +250,149 @@ def mech_ambush():
 		
 	print "You round the corner and walk straight into"
 	print "a Mechanoid unit who are waiting in ambush for you!\n"
-	
-	if len(squad) <= 1:
-		dead("Suicide has arrived!")
-	
-	y = squad[0]
-	print "%s is killed instantly!" % y
-	squad.remove(y)
-	
-	if len(squad) >= 1:
-		print squad
-	else:
-		dead("Suicide has arrived!")
-		
 	print "Next decision Commander?"
-	print "1. Retreat and regroup?"
+	print "1. Retreat and move to cover?"
 	print "2. Attempt to take the unit?\n"
 	
 	choice = raw_input("> ")
 	
 	if choice == "1":
-		corridor2()
+		print "The Mechs have the advantage and you are supressed with laser fire."
+		print "You resolve to move to cover."
+		print "You roll 2D6."
+		print "7+ means squad gets safely to cover."
+		print "6 or less means 1 fatality.\n"
+		
+		d1 = random.randint(1, 6)
+		d2 = random.randint(1, 6)
+		print d1, d2
+		result = d1 + d2
+		print "You roll a %d\n" % result
+		
+		if result > 6:
+			print "All squad members make it to cover safely."
+			print "Make the call to exterminate this scum!"
+			choice = raw_input("> ")
+			
+			if choice == "2":
+				print "Your team takes position and aims for the shot."
+				print "You realsise there are 4 Mechs!"
+				print "Roll 8 or higher to register a kill.\n"
+			
+				mechs = 4
+			
+				while mechs and squad > 0:
+					d1 = random.randint(1, 6)
+					d2 = random.randint(1, 6)
+					print d1, d2
+					result = d1 + d2
+					print "You roll a %d\n" % result
+				
+					if result > 7:
+						print "A Mech has been slain!\n"
+						mechs -= 1
+					elif result <= 7:
+						print "One of your squad was hit!"
+						x = len(squad)-1
+						fatal = squad[random.randint(0, x)]
+					
+						if fatal == "Commander":
+							dead("You die in glorious conflict!")
+						elif squad > 0:
+							print "The %s is dead.\n" % fatal
+							squad.remove(fatal)
+							print squad
+						else:
+							dead("You have been annihilated!")
+					else:
+						dead("You have been annihilated")
+				print "The squad takes out the Mechanoid scum.\n"
+				print squad
+				laser_cannon()	
+			
+		elif result <= 6:	
+			x = len(squad) - 1
+			fatal = squad[random.randint(0, x)]
+			if fatal == "Commander":
+				dead("You die in glorious conflict!")
+			else:
+				print "You make it to cover. You squad checks in. The %s is dead.\n" % fatal
+				squad.remove(fatal)
+				print squad
+				print "Make the call to exterminate this scum!"
+				choice = raw_input("> ")
+				
+				if choice == "2":
+					print "Your team takes position and aims for the shot."
+					print "You realsise there are 4 Mechs!"
+					print "Roll 8 or higher to register a kill.\n"
+			
+					mechs = 4
+			
+					while mechs and squad > 0:
+						d1 = random.randint(1, 6)
+						d2 = random.randint(1, 6)
+						print d1, d2
+						result = d1 + d2
+						print "You roll a %d\n" % result
+				
+						if result > 7:
+							print "A Mech has been slain!\n"
+							mechs -= 1
+						elif result <= 7:
+							print "One of your squad was hit!"
+							x = len(squad)-1
+							fatal = squad[random.randint(0, x)]
+					
+							if fatal == "Commander":
+								dead("You die in glorious conflict!")
+							elif squad > 0:
+								print "The %s is dead.\n" % fatal
+								squad.remove(fatal)
+								print squad
+							else:
+								dead("You have been annihilated!")
+						else:
+							dead("You have been annihilated")
+					print "The squad takes out the Mechanoid scum.\n"
+					print squad
+					laser_cannon()
+	
 	elif choice == "2":
-		dead("Suicide has arrived!")
+		print "Your team takes position and aims for the shot."
+		print "You realsise there are 4 Mechs!"
+		print "Roll 8 or higher to register a kill.\n"
+			
+		mechs = 4
+			
+		while mechs and squad > 0:
+			d1 = random.randint(1, 6)
+			d2 = random.randint(1, 6)
+			print d1, d2
+			result = d1 + d2
+			print "You roll a %d\n" % result
+				
+			if result > 7:
+				print "A Mech has been slain!\n"
+				mechs -= 1
+			elif result <= 7:
+				print "One of your squad was hit!"
+				x = len(squad)-1
+				fatal = squad[random.randint(0, x)]
+					
+				if fatal == "Commander":
+					dead("You die in glorious conflict!")
+				elif squad > 0:
+					print "The %s is dead.\n" % fatal
+					squad.remove(fatal)
+					print squad
+				else:
+					dead("You have been anihilated!")
+						
+		print "The squad takes out the Mechanoid scum.\n"
+		print squad
+		laser_cannon()
+			
 	else:
 		dead("Your hesitation has gotten you terminated!")
 	
@@ -137,7 +429,7 @@ def safe_room1a():
 		dead("You inexplicably leave the codes! You are relieved of duty!")	
 
 def corridor1b():
-	print "Back in the corridor you have a door opposite" 
+	print "\nBack in the corridor you have a door opposite and" 
 	print "the corridor to the right leading further into the ship"
 	print "What will you do?\n"
 	print "1. Open the door?"
@@ -160,45 +452,98 @@ def prisoners():
 	global squad
 	
 	print "You enter the room to see 2 prisoners in a cell."
-	print "They are bearly conscious."
+	print "They are beaten, tortured and broken but alive."
 	print "Do you....\n"
 	print "1. Rush over to free them?"
 	print "2. Survey the room?"
-	print "3. Return to free them later after the ship is liberated?"
-	# do I create another function to kill them for this mistake later?
+	print "3. Return to free them later after the ship is liberated?\n"
 	booby_trap_set = True
-	#Need to figure how to communicate state of booby trap between functions....Global var again?
-	choice = raw_input()
+	
+	choice = raw_input("> ")
 	
 	if choice == "1" or not booby_trap_set:
-		dead("You walk straight into a booby trap")
+		x = len(squad) - 1
+		fatal = squad[random.randint(0, x)]
+		print "Your rashness has set off a booby trap!"
+		
+		if fatal == "Commander":
+			dead("You sleep with the fishes!")
+		elif x > 0:
+			print "The %s is killed by the trap..." % fatal
+			squad.remove(fatal)
+			print squad
+			booby_trap_set = False
+			print "Make another choice."
+			
+			choice == raw_input("> ")
+			
+			if choice == "2" or not booby_trap_set:
+				print "You employ caution and find a trap."
+				booby_trap_set = False
+				x = len(squad)
+				if x > 1:
+					guard = squad[0]
+					print "You leave your %s with the casualties and vow vengence!" % guard
+					squad.remove(guard)
+					print squad				
+					corridor1b()
+				else:
+					dead("You flee like the coward you are!")
+					
+			elif choice == "3" or not booby_trap_set:
+				print "The prisoners are beaten but alive. You push onwards leaving a guard behind.\n"
+				y = squad[0]
+				squad.remove(y)
+				print squad
+				corridor1b()
+			else:
+				dead("You are consumed by fear...")
+			
 	elif choice == "2" or not booby_trap_set:
-		print "You employ caution and find a trap."
-		# Here you need to ascertain if Tech is still in team.
-		# If he is ok, if not penalty incurred to whoever disarms it (RNG)
+		print "You employ caution and find another booby trap."
 		booby_trap_set = False
-		print "You leave your medic with the casualties and vow vengence!"
-		global squad
-		squad.remove("Medic")
-		print squad
-		corridor1b()
-	elif choice == "3":
-		print "They are beaten but alive. You push onwards leaving a guard behind.\n"
-		y = squad[0]
-		squad.remove(y)
-		print squad
-		corridor1b()
+		
+		x = len(squad)
+		
+		if x > 1:		
+			guard = squad[0]
+			print "You leave your %s with the casualties and vow vengence!" % guard
+			squad.remove(guard)
+			print squad
+			corridor1b()
+		else:
+			dead("You are suffering from space sickness and cower in a corner...")
+	
+	elif choice == "3" or not booby_trap_set:
+		
+		x = len(squad)
+		
+		if x > 1:		
+			guard = squad[0]
+			print "You leave your %s with the casualties and vow vengence!" % guard
+			squad.remove(guard)
+			print squad
+			corridor1b()
 	else:
 		dead("You have made a critical error commander!")
 		
 def safe_room1():
 	print "The door opens and you find 2 Orcs!"
 	print "They open fire and a hail of cannon swamps you."
-	# Random squad member hit. RNG to determine????
-	print "The Sniper gets a hole blown in his chest!\n"
+	
 	global squad
-	squad.remove("Sniper")
-	print squad
+	x = len(squad)-1
+	fatal = squad[random.randint(0, x)]
+		
+	if fatal == "Commander":
+		dead("You are ended!")
+	elif x > 0:
+		print "The %s gets a hole blown in his chest!\n" % fatal
+		squad.remove(fatal)
+		print squad
+	else:
+		dead("You are wasted!")
+
 	print "You retreat back to the corridor and seal the door.\n"
 	corridor1a()
 
@@ -216,35 +561,105 @@ def corridor1a():
 		corridor1a()
 
 def corridor1():
+	
+	global squad
+	
 	print "You take cover with your men."
-	print "Your scout reports 2 Goblins ahead."
+	print "Your team reports 2 Goblins ahead."
 	print "Will you?...\n"
 	print "1. Charge them down in a hail of fire?"
 	print "2. Lob a photon grenade?"
-	print "3. Utilise the platoon sniper?"
+	print "3. Utilise the platoon attack formation?"
 		
 	choice = raw_input("> ")
 	
 	if choice == "1":
 		dead("You charge straight into a booby trap!")
+	
 	elif choice == "2":
-		print "The grenade is faulty and detonates in your Tech's hand.\n"
-		global squad
-		squad.remove("Tech")
-		print "Make another call!"
+		x = len(squad) - 1
+		fatal = squad[random.randint(0, x)]
 		
-		choice = raw_input("> ")
-		
-		if choice == "1":
-			dead("You charge straight into a booby trap!")
-		elif choice == "3":
-			print "The sniper takes out the Goblin scum.\n"
-			corridor1a()
+		if fatal == "Commander":
+			dead("The grenade blows up in your face!")
 		else:
-			dead("Your instructions are unclear in battle.")
+			print "The grenade is faulty and detonates in your %s's hand.\n" % fatal
+			squad.remove(fatal)
+			print squad
+			print "Make another call!\n"
+		
+			choice = raw_input("> ")
+		
+			if choice == "1":
+				dead("You charge straight into a booby trap!")
+			elif choice == "3":
+				print "Your team takes position and aims for a shot."
+				print "Roll 5 or higher to register a kill.\n"
+			
+				goblin = 2
+			
+				while goblin and squad > 0:
+					d1 = random.randint(1, 6)
+					d2 = random.randint(1, 6)
+					print d1, d2
+					result = d1 + d2
+					print "You roll a %d\n" % result
+				
+					if result > 4:
+						print "A goblin has been slain!\n"
+						goblin -= 1
+					elif result <= 4:
+						print "One of your squad was hit!"
+						x = len(squad)-1
+						fatal = squad[random.randint(0, x)]
+					
+						if fatal == "Commander":
+							dead("You die in glorious conflict!")
+						elif squad > 0:
+							print "The %s is dead.\n" % fatal
+							squad.remove(fatal)
+							print squad
+						else:
+							dead("You have been anihilated!")
+						
+				print "The squad takes out the Goblin scum.\n"
+				print squad
+				corridor1a()
+			else:
+				dead("Your instructions are unclear in battle.")
 				
 	elif choice == "3":
-		print "The sniper takes out the Goblin scum.\n"
+		print "Your team takes position and aims for a shot."
+		print "Roll 5 or higher to register a kill.\n"
+			
+		goblin = 2
+			
+		while goblin and squad > 0:
+			d1 = random.randint(1, 6)
+			d2 = random.randint(1, 6)
+			print d1, d2
+			result = d1 + d2
+			print "You roll a %d\n" % result
+				
+			if result > 4:
+				print "A goblin has been slain!\n"
+				goblin -= 1
+			elif result <= 4:
+				print "One of your squad was hit!"
+				x = len(squad)-1
+				fatal = squad[random.randint(0, x)]
+					
+				if fatal == "Commander":
+					dead("You die in glorious conflict!")
+				elif squad > 0:
+					print "The %s is dead.\n" % fatal
+					squad.remove(fatal)
+					print squad
+				else:
+					dead("You have been anihilated!")
+						
+		print "The squad takes out the Goblin scum.\n"
+		print squad
 		corridor1a()
 	else:
 		dead("Your instructions are unclear in battle!")
@@ -260,7 +675,7 @@ def start():
 	print "Will you? :\n"
 	print "1. Stand and return fire?"
 	print "2. Move to cover?"
-	print "3. Send in your men first?"
+	print "3. Send in your men first?\n"
 	
 	global squad
 	squad = ["Scout", "Tech", "Medic", "Sniper", "Commander"]
@@ -269,7 +684,32 @@ def start():
 	choice = raw_input("> ")
 	
 	if choice == "1":
-		dead("You are cut down in laser fire.")
+		print "The Goblins have the advantage and you are supressed with laser fire."
+		print "You resolve to move to cover."
+		print "You roll 2D6."
+		print "7+ means squad gets safely to cover."
+		print "6 or less means 1 fatality.\n"
+		d1 = random.randint(1, 6)
+		d2 = random.randint(1, 6)
+		print d1, d2
+		result = d1 + d2
+		print "You roll a %d\n" % result
+		
+		if result > 6:
+			print "All squad members make it to cover safely."
+			corridor1()
+		elif result <= 6:	
+			fatal = squad[random.randint(0, 4)]
+			if fatal == "Commander":
+				dead("You die in glorious conflict!")
+			else:
+				print "You make it to cover. You squad checks in. The %s is dead.\n" % fatal
+				squad.remove(fatal)
+				print squad
+				corridor1()
+		else:
+			dead("You are hacked down in gunfire!")
+				
 	elif choice == "2":
 		corridor1()
 	elif choice == "3":
@@ -278,3 +718,4 @@ def start():
 		dead("Your instructions are unclear in battle!")
 		
 start()
+
